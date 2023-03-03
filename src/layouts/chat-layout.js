@@ -81,7 +81,7 @@ export default function ChatLayout(props) {
       size: 'sm',
       color: 'neutral',
       variant: 'soft',
-      src: '/icon/ChatUI-icon-bg-transparent.svg',
+      src: `${'/chat-ui'}/icon/ChatUI-icon-bg-transparent.svg`,
       sx: {
         cursor: 'pointer',
       },
