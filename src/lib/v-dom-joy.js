@@ -79,6 +79,7 @@ export function BlockButton(props) {
     icon,
     iconProps,
     children,
+    isActive,
     ...otherProps
   } = props;
   const {
@@ -91,7 +92,7 @@ export function BlockButton(props) {
 
   return btn({
     sx: bbSX,
-    size: 'sm', variant: 'plain', color: 'neutral',
+    size: 'sm', variant: isActive ? 'soft' : 'plain', color: 'neutral',
     startDecorator: vNode(icon, {sx: btnStartDecoratorSX, ...otherIconProps}),
     ...otherProps,
   }, children);

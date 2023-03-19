@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import vNode from '../lib/vue-to-react';
 import Lodash_debounce from 'lodash/debounce';
+import { cloneDeep } from 'lodash';
 
 import { useTheme } from '@mui/joy/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -37,6 +38,8 @@ import CircleRoundedIcon from '@mui/icons-material/CircleRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
 
+import GitHubIcon from '@mui/icons-material/GitHub';
+
 import { cornerTools } from './default-layout--corner-tools';
 import { statusBar, statusBarHolder } from './default-layout--status-bar';
 import { sideDrawer } from './chat-layout--side-drawer';
@@ -46,11 +49,27 @@ import { fontWeight } from '@mui/system';
 
 // import { goTo } from '../api/urls';
 
+import GlobalStateManagerValtio from '../contexts/global-state';
+import { nanoid } from 'nanoid';
+
 
 export default function ChatLayout(props) {
+  const globalState = GlobalStateManagerValtio.proxy;
+  const globalStateSnap = GlobalStateManagerValtio.$snapshot_not_sync;
+
   const { mode, systemMode, setMode } = useColorScheme();
   // const { userState, userReducers, dispatch } = useUserState();
-
+  useEffect(()=>{
+    if (globalState?.value?.settings?.darkMode!=null) {
+      if (globalState.value.settings.darkMode) {
+        setMode('dark');
+        document.documentElement.setAttribute('theme-mode', 'dark');
+      } else {
+        setMode('light');
+        document.documentElement.removeAttribute('theme-mode');
+      };
+    };
+  }, []);
 
   const theme = useTheme();
   // const isUpXs = useMediaQuery(theme.breakpoints.up('xs'));
@@ -148,6 +167,14 @@ export default function ChatLayout(props) {
     variant: 'plain',
     size: 'md',
     onClick: ()=>{
+      console.log("dda");
+      globalState?.value?.chatLogs?.forEach?.(it=>{it.isActive=undefined;});
+      const the_new_key = nanoid();
+      globalState?.value?.chatLogs?.unshift?.({
+        _key: the_new_key,
+        isActive: true,
+      });
+      globalState.value.currentChatKey = the_new_key;
     },
   }, vNode(AddRoundedIcon)));
 
@@ -240,28 +267,43 @@ export default function ChatLayout(props) {
       borderTop: theme=>`1px solid ${theme.vars.palette.neutral.softBg}`,
     },
   }, vstack({gap: 1.2}, [
-    blkBtn({
-      icon: CircleRoundedIcon,
-      iconProps: {sx: {opacity: 0}},
-    }, "Hello"),
+    // blkBtn({
+    //   icon: CircleRoundedIcon,
+    //   iconProps: {sx: {opacity: 0}},
+    // }, "Hello"),
     blkBtn({
       icon: mode === 'dark' ? LightModeRoundedIcon : DarkModeRoundedIcon,
       onClick: ()=>{
         if (mode === 'dark') {
           document.documentElement.removeAttribute('theme-mode');
           setMode('light');
+          globalState.value.settings.darkMode = false;
         } else {
           document.documentElement.setAttribute('theme-mode', 'dark');
           setMode('dark');
+          globalState.value.settings.darkMode = true;
         };
       },
     }, mode === 'dark' ? "Light mode" : "Dark mode"),
     blkBtn({
       icon: SettingsRoundedIcon,
     }, "Settings"),
+    blkBtn({
+      icon: GitHubIcon,
+    }, "GitHub"),
   ]));
 
 
+
+
+  const onClickSideListBtn=(idx)=>{
+    const list = cloneDeep(globalStateSnap?.value?.chatLogs??[]);
+    list.forEach(it=>{it.isActive=undefined;});
+    console.log("hh");
+    list[idx].isActive = true;
+    globalState.value.currentChatKey = list[idx]?.['_key'];
+    globalState.value.chatLogs = list;
+  };
 
 
 
@@ -367,9 +409,14 @@ export default function ChatLayout(props) {
             px: 1.2,
           },
         }, [
-          vstack({gap: 1.2,}, [...Array(50)].map(it => blkBtn({
+          vstack({gap: 1.2,}, (globalStateSnap?.value?.chatLogs??[]).map((it, idx) => blkBtn({
+            key: it?._key??`xx-${idx}`,
             icon: ChatBubbleOutlineRoundedIcon,
-          }, "Some Topic"))),
+            isActive: it?.isActive,
+            onClick: ()=>{
+              onClickSideListBtn(idx);
+            },
+          }, it?.title??"(无题)"))),
         ]),
         sideBarBottom(),
       ]),
@@ -406,7 +453,9 @@ export default function ChatLayout(props) {
 
     // props?.children,
     // myPage(props?.pageProps, props?.children),
-    cornerTools(),
+
+    // cornerTools(),
+
     // statusBar(),
 
 

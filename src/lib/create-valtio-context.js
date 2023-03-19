@@ -21,6 +21,10 @@ export function createValtioWrapper(myVal) {
     get $snapshot_sync() {return useSnapshot(myValProxy, { sync: true });},
     get $snapshot_not_sync() {return useSnapshot(myValProxy);},
 
+    snapshot(options) {return useSnapshot(myValProxy, options);},
+
+    subscribe(...args) {return valtio.subscribe(myValProxy, ...args);},
+
     get valtio() {return valtio;},
     get valtio_utils() {return valtio_utils;},
   };
@@ -49,6 +53,8 @@ export default function createValtioContext(myVal) {
     get $snapshot() {return useSnapshot(useContext(myContext), { sync: true });},
     get $snapshot_sync() {return useSnapshot(useContext(myContext), { sync: true });},
     get $snapshot_not_sync() {return useSnapshot(useContext(myContext));},
+
+    snapshot(options) {return useSnapshot(myValProxy, options);},
 
     get valtio() {return valtio;},
     get valtio_utils() {return valtio_utils;},

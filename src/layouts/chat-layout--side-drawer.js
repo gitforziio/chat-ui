@@ -21,7 +21,14 @@ import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import DarkModeRoundedIcon from '@mui/icons-material/DarkModeRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
+
+import GlobalStateManagerValtio from '../contexts/global-state';
+
+
+
 export function SideDrawer(props) {
+  const globalState = GlobalStateManagerValtio.proxy;
+
   const { mode, systemMode, setMode } = useColorScheme();
   const content = () => container({
     sx: {my: 2,},
